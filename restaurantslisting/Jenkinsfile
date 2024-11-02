@@ -64,7 +64,7 @@ pipeline {
 
     stage('Docker Build and Push') {
       steps {
-        dir('restaurantslisting') { // Change to the directory containing the Dockerfile
+        dir('restaurantslisting') { // Directory containing the Dockerfile
           sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
           sh 'docker build -t ravishandoc/restaurant-listing-service:${VERSION} .'
           sh 'docker push ravishandoc/restaurant-listing-service:${VERSION}'
@@ -80,7 +80,7 @@ pipeline {
 
     stage('Clone Repository') {
       steps {
-        // Clone the repository
+        // Clone the repository's main branch
         checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'git-ssh', url: 'git@github.com:ravishansenevirathna/Food-Delivery-Application-Spring-Boot-Microservice-K8s-CICD-AWS.git']])
         // List files to confirm directory structure
         sh 'ls -R'  // Check what has been cloned and where
@@ -98,17 +98,19 @@ pipeline {
     stage('Update Image Tag in GitOps') {
       steps {
         script {
+          // Clone the gitops-updates branch
+          checkout scmGit(branches: [[name: '*/gitops-updates']], extensions: [], userRemoteConfigs: [[credentialsId: 'git-ssh', url: 'git@github.com:ravishansenevirathna/Food-Delivery-Application-Spring-Boot-Microservice-K8s-CICD-AWS.git']])
+
           // Navigate to the deployment folder
           dir('deployment-folder') {
-            sh 'ls -la' // List files in deployment-folder for confirmation
+            sh 'ls -la' // List files for confirmation
             sh '''
               sed -i "s/image:.*/image: ravishandoc\\/restaurant-listing-service:${VERSION}/" aws/restaurant-manifest.yml
             '''
-            sh 'git checkout main'
             sh 'git add .'
-            sh 'git commit -m "Update image tag"'
+            sh 'git commit -m "Update image tag [ci skip]" || echo "No changes to commit"'
             sshagent(['git-ssh']) {
-              sh 'git push'
+              sh 'git push origin gitops-updates'
             }
           }
         }
