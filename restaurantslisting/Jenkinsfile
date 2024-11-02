@@ -80,16 +80,20 @@ pipeline {
 
     stage('Update Image Tag in GitOps') {
       steps {
-        checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'git-ssh', url: 'git@github.com:ravishansenevirathna/Food-Delivery-Application-Spring-Boot-Microservice-K8s-CICD-AWS.git/deployment-folder.git']])
+        // Clone the entire repository, not just a subdirectory
+        checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'git-ssh', url: 'git@github.com:ravishansenevirathna/Food-Delivery-Application-Spring-Boot-Microservice-K8s-CICD-AWS.git']])
         script {
-          sh '''
-            sed -i "s/image:.*/image: ravishandoc\\/restaurant-listing-service:${VERSION}/" aws/restaurant-manifest.yml
-          '''
-          sh 'git checkout main'
-          sh 'git add .'
-          sh 'git commit -m "Update image tag"'
-          sshagent(['git-ssh']) {
-            sh 'git push'
+          // Navigate to the deployment folder
+          dir('deployment-folder') {
+            sh '''
+              sed -i "s/image:.*/image: ravishandoc\\/restaurant-listing-service:${VERSION}/" aws/restaurant-manifest.yml
+            '''
+            sh 'git checkout main'
+            sh 'git add .'
+            sh 'git commit -m "Update image tag"'
+            sshagent(['git-ssh']) {
+              sh 'git push'
+            }
           }
         }
       }
