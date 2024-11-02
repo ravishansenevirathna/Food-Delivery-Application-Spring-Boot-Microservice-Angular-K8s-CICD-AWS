@@ -78,18 +78,25 @@ pipeline {
       }
     }
 
-    stage('List Files') {
+    stage('Clone Repository') {
+      steps {
+        // Clone the repository
+        checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'git-ssh', url: 'git@github.com:ravishansenevirathna/Food-Delivery-Application-Spring-Boot-Microservice-K8s-CICD-AWS.git']])
+        // List files to confirm directory structure
+        sh 'ls -R'  // Check what has been cloned and where
+      }
+    }
+
+    stage('List Files in Deployment Folder') {
       steps {
         script {
-          sh 'ls -R deployment-folder'
+          sh 'ls -R deployment-folder'  // Attempt to list files in deployment-folder
         }
       }
     }
 
     stage('Update Image Tag in GitOps') {
       steps {
-        // Clone the entire repository, not just a subdirectory
-        checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'git-ssh', url: 'git@github.com:ravishansenevirathna/Food-Delivery-Application-Spring-Boot-Microservice-K8s-CICD-AWS.git']])
         script {
           // Navigate to the deployment folder
           dir('deployment-folder') {
