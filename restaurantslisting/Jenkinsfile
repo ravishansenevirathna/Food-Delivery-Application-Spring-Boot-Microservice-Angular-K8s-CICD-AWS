@@ -35,7 +35,7 @@ pipeline {
       }
     }
 
-    stage('Check code coverage') {
+    stage('Check Code Coverage') {
       steps {
         script {
           def token = "squ_e6fe2fc6b2c1faf3fa3675c1588ee7ac24810035"
@@ -78,6 +78,14 @@ pipeline {
       }
     }
 
+    stage('List Files') {
+      steps {
+        script {
+          sh 'ls -R deployment-folder'
+        }
+      }
+    }
+
     stage('Update Image Tag in GitOps') {
       steps {
         // Clone the entire repository, not just a subdirectory
@@ -85,7 +93,7 @@ pipeline {
         script {
           // Navigate to the deployment folder
           dir('deployment-folder') {
-            sh 'ls -la'
+            sh 'ls -la' // List files in deployment-folder for confirmation
             sh '''
               sed -i "s/image:.*/image: ravishandoc\\/restaurant-listing-service:${VERSION}/" aws/restaurant-manifest.yml
             '''
