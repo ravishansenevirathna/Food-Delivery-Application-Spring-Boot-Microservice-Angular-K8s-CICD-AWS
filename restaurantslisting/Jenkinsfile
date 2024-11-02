@@ -85,6 +85,7 @@ pipeline {
         script {
           // Navigate to the deployment folder
           dir('deployment-folder') {
+            sh 'ls -la'
             sh '''
               sed -i "s/image:.*/image: ravishandoc\\/restaurant-listing-service:${VERSION}/" aws/restaurant-manifest.yml
             '''
