@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: angularapp
 spec:
-  replicas: 1  # Adjust the number of replicas as per your requirements
+  replicas: 1
   selector:
     matchLabels:
       app: angularapp
